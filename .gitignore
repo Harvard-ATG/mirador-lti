@@ -9,3 +9,4 @@
 /.travis/generated_*.js
 /config/django_secret.txt
 /config/lti_oauth_credentials.txt
+/.idea

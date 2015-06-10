@@ -37,6 +37,8 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_app_lti',
+
 )
 
 MIDDLEWARE_CLASSES = (
@@ -100,3 +102,11 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
 
 STATIC_URL = '/static/'
+
+# Add LTI configuration settings (for django-app-lti)
+LTI_SETUP = {
+    "LAUNCH_REDIRECT_URL": "myapp:index",
+    "TOOL_TITLE": "My LTI Tool Name",
+}
+# Add LTI oauth credentials (for django-auth-lti)
+LTI_OAUTH_CREDENTIALS = {"mykey":"mysecret"}
