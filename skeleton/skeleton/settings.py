@@ -107,6 +107,13 @@ STATIC_URL = '/static/'
 LTI_SETUP = {
     "LAUNCH_REDIRECT_URL": "myapp:index",
     "TOOL_TITLE": "My LTI Tool Name",
+    "TOOL_DESCRIPTION": "My tool description",
+    "CANVAS_PRIVACY_LEVEL": "public",
+    "CANVAS_COURSE_NAVIGATION": {
+        'enabled': 'true',
+        'default': 'disabled',
+        'text': "MY LTI Tool (localhost)",
+    },
 }
 # Add LTI oauth credentials (for django-auth-lti)
 LTI_OAUTH_CREDENTIALS = {"mykey":"mysecret"}
