@@ -38,7 +38,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_app_lti',
-
+    'myapp',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -46,10 +46,16 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
+    #'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'django.middleware.security.SecurityMiddleware',
+    #'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    #'django.middleware.security.SecurityMiddleware',
+    'django_auth_lti.middleware.LTIAuthMiddleware',
+)
+
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',
+    'django_auth_lti.backends.LTIAuthBackend',
 )
 
 ROOT_URLCONF = 'skeleton.urls'
@@ -106,14 +112,19 @@ STATIC_URL = '/static/'
 # Add LTI configuration settings (for django-app-lti)
 LTI_SETUP = {
     "LAUNCH_REDIRECT_URL": "myapp:index",
-    "TOOL_TITLE": "My LTI Tool Name",
+    "TOOL_TITLE": "My tool name",
     "TOOL_DESCRIPTION": "My tool description",
-    "CANVAS_PRIVACY_LEVEL": "public",
-    "CANVAS_COURSE_NAVIGATION": {
-        'enabled': 'true',
-        'default': 'disabled',
-        'text': "MY LTI Tool (localhost)",
-    },
+    "EXTENSION_PARAMETERS": {
+        "canvas.instructure.com": {
+            "privacy_level": "public",
+            "course_navigation": {
+                "enabled": "true",
+                "default": "disabled",
+                "text": "MY tool (localhost)",
+            }
+        }
+    }
 }
+
 # Add LTI oauth credentials (for django-auth-lti)
 LTI_OAUTH_CREDENTIALS = {"mykey":"mysecret"}

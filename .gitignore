@@ -1,12 +1,6 @@
 *.db
+*.sqlite3
 *.log
 *.pyc
-/env/*
-/docs/jsdoc/out/*
-/data/*
-/static/*
-/*.log
-/.travis/generated_*.js
-/config/django_secret.txt
-/config/lti_oauth_credentials.txt
-/.idea
+.env
+/venv/
