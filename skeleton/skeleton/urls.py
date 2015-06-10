@@ -19,7 +19,7 @@ import django_app_lti.urls
 
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
-    url(r'^lti/', include(django_app_lti.urls)),
+    url(r'^lti/', include(django_app_lti.urls, namespace="lti")),
 ]
 
 
