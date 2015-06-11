@@ -113,7 +113,7 @@ STATIC_URL = '/static/'
 LTI_SETUP = {
     "TOOL_TITLE": "My tool name",
     "TOOL_DESCRIPTION": "My tool description",
-    "LAUNCH_URL": "lti:launch",
+    "LAUNCH_URL": "myapp:launch", # defaults to "lti:launch"
     "LAUNCH_REDIRECT_URL": "myapp:index",
     "EXTENSION_PARAMETERS": {
         "canvas.instructure.com": {
