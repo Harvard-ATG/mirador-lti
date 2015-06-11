@@ -111,16 +111,17 @@ STATIC_URL = '/static/'
 
 # Add LTI configuration settings (for django-app-lti)
 LTI_SETUP = {
-    "LAUNCH_REDIRECT_URL": "myapp:index",
     "TOOL_TITLE": "My tool name",
     "TOOL_DESCRIPTION": "My tool description",
+    "LAUNCH_URL": "lti:launch",
+    "LAUNCH_REDIRECT_URL": "myapp:index",
     "EXTENSION_PARAMETERS": {
         "canvas.instructure.com": {
             "privacy_level": "public",
             "course_navigation": {
                 "enabled": "true",
                 "default": "disabled",
-                "text": "MY tool (localhost)",
+                "text": "My tool (localhost)",
             }
         }
     }

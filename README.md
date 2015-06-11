@@ -6,6 +6,7 @@ This is a skeleton django project that imports [django-app-lti](https://github.c
 
 ```sh
 $ pip install -r requirements.txt
+$ cd skeleton/
 $ ./manage.py syncdb && ./manage.py migrate
 $ ./manage.py runserver
 ```
