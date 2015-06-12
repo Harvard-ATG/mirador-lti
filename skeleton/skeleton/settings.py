@@ -115,6 +115,7 @@ LTI_SETUP = {
     "TOOL_DESCRIPTION": "My tool description",
     "LAUNCH_URL": "myapp:launch", # defaults to "lti:launch"
     "LAUNCH_REDIRECT_URL": "myapp:index",
+    "INITIALIZE_MODELS": "resource_and_course_users", # can be: False | resource_only | resource_and_course | resource_and_course_users
     "EXTENSION_PARAMETERS": {
         "canvas.instructure.com": {
             "privacy_level": "public",
