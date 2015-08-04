@@ -59,7 +59,7 @@ AUTHENTICATION_BACKENDS = (
     'django_auth_lti.backends.LTIAuthBackend',
 )
 
-ROOT_URLCONF = 'mirador.urls'
+ROOT_URLCONF = 'mirador_lti.urls'
 
 TEMPLATES = [
     {
@@ -77,7 +77,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'mirador.wsgi.application'
+WSGI_APPLICATION = 'mirador_lti.wsgi.application'
 
 
 # Database
@@ -109,6 +109,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
 
 STATIC_URL = '/static/'
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'http_static')
 
 # Add LTI configuration settings (for django-app-lti)
 LTI_SETUP = {

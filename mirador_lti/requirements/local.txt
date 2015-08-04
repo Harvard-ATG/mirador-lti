@@ -1,0 +1,2 @@
+-r base.txt
+pysqlite>=2.6.3

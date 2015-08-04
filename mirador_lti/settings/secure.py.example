@@ -1,0 +1,6 @@
+SECURE_SETTINGS = {
+	"django_secret_key": "foo", 
+	"lti_oauth_credentials": {
+		"mykey": "mysecret"
+	}
+}
