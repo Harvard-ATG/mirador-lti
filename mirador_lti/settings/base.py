@@ -133,4 +133,4 @@ LTI_SETUP = {
 }
 
 # Add LTI oauth credentials (for django-auth-lti)
-LTI_OAUTH_CREDENTIALS = SECURE_SETTINGS.get('lti_oath_credentials')
+LTI_OAUTH_CREDENTIALS = SECURE_SETTINGS.get('lti_oauth_credentials', {})
