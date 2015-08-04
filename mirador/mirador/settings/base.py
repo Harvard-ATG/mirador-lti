@@ -12,8 +12,9 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
+from .secure import SECURE_SETTINGS
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 
 # Quick-start development settings - unsuitable for production
@@ -112,7 +113,7 @@ STATIC_URL = '/static/'
 # Add LTI configuration settings (for django-app-lti)
 LTI_SETUP = {
     "TOOL_TITLE": "Mirador-LTI",
-    "TOOL_DESCRIPTION": "Mirador implementation for LTI
+    "TOOL_DESCRIPTION": "Mirador implementation for LTI",
     "LAUNCH_URL": "myapp:launch", # defaults to "lti:launch"
     "LAUNCH_REDIRECT_URL": "myapp:index",
     "INITIALIZE_MODELS": "resource_and_course_users", # can be: False | resource_only | resource_and_course | resource_and_course_users

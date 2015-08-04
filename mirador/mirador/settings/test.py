@@ -1,1 +1,1 @@
-from aws import *
+from .aws import *
