@@ -58,7 +58,7 @@ AUTHENTICATION_BACKENDS = (
     'django_auth_lti.backends.LTIAuthBackend',
 )
 
-ROOT_URLCONF = 'skeleton.urls'
+ROOT_URLCONF = 'mirador.urls'
 
 TEMPLATES = [
     {
@@ -76,7 +76,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'skeleton.wsgi.application'
+WSGI_APPLICATION = 'mirador.wsgi.application'
 
 
 # Database
