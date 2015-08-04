@@ -1,12 +1,9 @@
-# django-lti-skeleton
-
-This is a skeleton django project that imports [django-app-lti](https://github.com/Harvard-ATG/django-app-lti) and provides a single view function in **myapp**.
+# mirador_lti 
 
 ## Quickstart
 
 ```sh
-$ pip install -r requirements.txt
-$ cd skeleton/
+$ pip install -r mirador_lti/requirements/local.txt
 $ ./manage.py syncdb && ./manage.py migrate
 $ ./manage.py runserver
 ```
