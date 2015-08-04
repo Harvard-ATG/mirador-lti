@@ -20,7 +20,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'k3dtu7d0+jlg5&*3&s1wt8p_en$&kf2e1fd(ka@5xfo@$qv-bh'
+SECRET_KEY = SECURE_SETTINGS.get('django_secret_key')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -111,8 +111,8 @@ STATIC_URL = '/static/'
 
 # Add LTI configuration settings (for django-app-lti)
 LTI_SETUP = {
-    "TOOL_TITLE": "My tool name",
-    "TOOL_DESCRIPTION": "My tool description",
+    "TOOL_TITLE": "Mirador-LTI",
+    "TOOL_DESCRIPTION": "Mirador implementation for LTI
     "LAUNCH_URL": "myapp:launch", # defaults to "lti:launch"
     "LAUNCH_REDIRECT_URL": "myapp:index",
     "INITIALIZE_MODELS": "resource_and_course_users", # can be: False | resource_only | resource_and_course | resource_and_course_users
@@ -129,4 +129,4 @@ LTI_SETUP = {
 }
 
 # Add LTI oauth credentials (for django-auth-lti)
-LTI_OAUTH_CREDENTIALS = {"mykey":"mysecret"}
+LTI_OAUTH_CREDENTIALS = SECURE_SETTINGS.get('lti_oath_credentials')
