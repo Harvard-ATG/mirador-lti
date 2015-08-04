@@ -4,4 +4,4 @@
 *.pyc
 .env
 /venv/
-settings/secure.py
+secure.py
