@@ -39,7 +39,8 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_app_lti',
-    'myapp',
+    'iiif',
+    'mirador',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -116,8 +117,8 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'http_static')
 LTI_SETUP = {
     "TOOL_TITLE": "Mirador-LTI",
     "TOOL_DESCRIPTION": "Mirador implementation for LTI",
-    "LAUNCH_URL": "myapp:launch", # defaults to "lti:launch"
-    "LAUNCH_REDIRECT_URL": "myapp:index",
+    "LAUNCH_URL": "lti:launch", # defaults to "lti:launch"
+    "LAUNCH_REDIRECT_URL": "mirador:index",
     "INITIALIZE_MODELS": "resource_and_course_users", # can be: False | resource_only | resource_and_course | resource_and_course_users
     "EXTENSION_PARAMETERS": {
         "canvas.instructure.com": {
@@ -125,7 +126,7 @@ LTI_SETUP = {
             "course_navigation": {
                 "enabled": "true",
                 "default": "disabled",
-                "text": "My tool (localhost)",
+                "text": "Mirador",
             }
         }
     }
