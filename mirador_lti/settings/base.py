@@ -119,7 +119,7 @@ LTI_SETUP = {
     "TOOL_DESCRIPTION": "Mirador implementation for LTI",
     "LAUNCH_URL": "lti:launch", # defaults to "lti:launch"
     "LAUNCH_REDIRECT_URL": "mirador:index",
-    "INITIALIZE_MODELS": "resource_and_course_users", # can be: False | resource_only | resource_and_course | resource_and_course_users
+    "INITIALIZE_MODELS": "resource_and_course", # can be: False | resource_only | resource_and_course | resource_and_course_users
     "EXTENSION_PARAMETERS": {
         "canvas.instructure.com": {
             "privacy_level": "public",
