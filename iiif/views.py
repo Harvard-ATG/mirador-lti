@@ -1,12 +1,20 @@
-from django.http import HttpResponse
+from django.http import HttpResponse, Http404
 from django.core.urlresolvers import reverse
 import json
+from manifest import Manifest
 
-def manifest(request, identifier):
-    manifest_id = request.build_absolute_uri(reverse('iiif:manifest', args=[identifier])) 
-    manifest = {
-        '@context': 'http://www.shared-canvas.org/ns/context.json',
-        "@id": manifest_id,
+def _manifest(request, manifest_id):
+    manifest = Manifest(request, manifest_id, label='', description='')
+    manifest.create()
+    return manifest
 
-    }
-    return HttpResponse(json.dumps(manifest), content_type="application/json")
+def manifest(request, *args):
+    result = ''
+    if len(args) == 1:
+        manifest_id = args[0]
+        manifest = _manifest(request, manifest_id)
+        result = manifest.to_json()
+    else:
+        raise Http404
+    
+    return HttpResponse(result, content_type="application/json")
