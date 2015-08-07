@@ -89,7 +89,7 @@ class Canvas:
             "label": self.label,
             "images": [{
                 "@id": "",
-                "@type": "oaAnnotation",
+                "@type": "oa:Annotation",
                 "resource": self.resource.to_dict(),
                 "on": self.canvas_id,
             }]
