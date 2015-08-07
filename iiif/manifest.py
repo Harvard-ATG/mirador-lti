@@ -18,7 +18,7 @@ class Manifest:
         for n, img in enumerate(images, start=1):
             if not img['is_link']:
                 can = seq.add_canvas(n)
-                can.set_label('Image %d' % n)
+                can.set_label(img['label'])
                 can.add_image(img['id'], img['url'], img['is_link'])
         return self
  

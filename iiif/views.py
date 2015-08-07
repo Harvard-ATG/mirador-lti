@@ -7,7 +7,7 @@ from mirador.models import IsiteImages, LTICourseImages
 
 def _manifest(request, manifest_id):
     images = _get_images(request, manifest_id)
-    manifest = Manifest(request, manifest_id, label='', description='')
+    manifest = Manifest(request, manifest_id, label='Manifest', description='Manifest of course images')
     manifest.create(images=images)
     return manifest
 
@@ -18,7 +18,8 @@ def _get_images(request, manifest_id):
     for img in isite_images:
         manifest_img = {
             'id': img.id,
-            'is_link': img.isite_file_type == 'link'
+            'is_link': img.isite_file_type == 'link',
+            'label': img.isite_file_title
         }
 
         if img.isite_file_type == 'file':
