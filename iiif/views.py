@@ -6,13 +6,13 @@ from manifest import Manifest
 from mirador.models import IsiteImages, LTICourseImages
 
 def _manifest(request, manifest_id):
+    images = _get_images(request, manifest_id)
     manifest = Manifest(request, manifest_id, label='', description='')
-    manifest.create(images=_get_images(request, manifest_id))
+    manifest.create(images=images)
     return manifest
 
 def _get_images(request, manifest_id):
     isite_images = IsiteImages.objects.all()
-    print isite_images
     manifest_images = []
 
     for img in isite_images:
