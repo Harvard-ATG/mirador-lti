@@ -9,7 +9,6 @@ class Manifest:
         self.label = kwargs.get('label', '')
         self.description = kwargs.get('description', '')
         self.sequences = []
-        
 
     def create(self, images=None):
         if images is None:
@@ -31,7 +30,7 @@ class Manifest:
         manifest = {
             "@context": "http://iiif.io/api/presentation/2/context.json",
             "@type": "sc:Manifest",
-            "@id": self.request.build_absolute_uri(reverse('iiif:manifest', args=[self.manifest_id])),
+            "@id": self.build_url('iiif:manifest', [self.manifest_id]),
             "label": self.label,
             "description": self.description,
             "sequences": [sequence.to_dict() for sequence in self.sequences]
