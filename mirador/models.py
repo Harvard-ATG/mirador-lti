@@ -12,10 +12,10 @@ class IsiteImages(models.Model):
     s3_key = models.CharField(max_length=4096, null=True)
     s3_bucket = models.CharField(max_length=128, null=True)
     created = models.DateTimeField(auto_now_add=True)
-    updated = models.DateTimeField(auto_now=True)
+    updated = models.DateTimeField(auto_now=True) 
 
     class Meta:
-        ordering = ['isite_keyword', 'isite_topic_id', 'isite_file_type', 'isite_file_name']
+        ordering = ['id']
         verbose_name = 'Isite Image'
         verbose_name_plural = 'Isite Images'
         

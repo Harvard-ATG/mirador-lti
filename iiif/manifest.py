@@ -3,24 +3,22 @@ from django.core.urlresolvers import reverse
 import json
 
 class Manifest:
-    def __init__(self, request, manifest_id, **kwargs): 
+    def __init__(self, request, manifest_id, **kwargs):
+        self.request = request
+        self.manifest_id = manifest_id
         self.label = kwargs.get('label', '')
         self.description = kwargs.get('description', '')
-        self.manifest_id = manifest_id
         self.sequences = []
-        self.request = request
+        
 
-    def create(self, **kwargs):
-        images = kwargs.get('images', [])
-        images = [
-            {'id':123, 'url': 'http://localhost:8000/images/1.jpg'},
-            {'id':456, 'url':'http://localhost:8000/images/2.jpg'},
-        ]
+    def create(self, images=None):
+        if images is None:
+            images = []
         seq = self.add_sequence(1)
         for n, img in enumerate(images, start=1):
             can = seq.add_canvas(n)
             can.set_label('Image %d' % n)
-            can.add_image(img['id'], img['url'])
+            can.add_image(img['id'], img['url'], img['is_link'])
         return self
  
     def add_sequence(self, sequence_id):
@@ -38,6 +36,9 @@ class Manifest:
             "sequences": [sequence.to_dict() for sequence in self.sequences]
         }
         return manifest
+    
+    def build_url(self, url_name, url_args):
+        return self.request.build_absolute_uri(reverse(url_name, args=url_args))
 
     def to_json(self):
         return dump_to_json(self.to_dict())
@@ -58,7 +59,7 @@ class Sequence:
 
     def to_dict(self):
         sequence = {
-            "@id": self.manifest.request.build_absolute_uri(reverse('iiif:sequence', args=[self.manifest.manifest_id, 'sequence', self.sequence_id])),
+            "@id": self.manifest.build_url('iiif:sequence', [self.manifest.manifest_id, 'sequence', self.sequence_id]),
             "@type": "sc:Sequence",
             "label": "Default order",
             "canvases": [canvas.to_dict() for canvas in self.canvases],
@@ -75,8 +76,8 @@ class Canvas:
         self.label = 'Image'
         self.resources = []
 
-    def add_image(self, image_id, image_url):
-        self.resource = ImageResource(self.manifest, image_id, image_url)
+    def add_image(self, image_id, image_url, is_link):
+        self.resource = ImageResource(self.manifest, image_id, image_url, is_link)
         return self
     
     def set_label(self, label):
@@ -84,7 +85,7 @@ class Canvas:
 
     def to_dict(self):
         canvas = {
-            "@id": self.manifest.request.build_absolute_uri(reverse('iiif:canvas', args=[self.manifest.manifest_id, 'canvas', self.canvas_id])),
+            "@id": self.manifest.build_url('iiif:canvas', [self.manifest.manifest_id, 'canvas', self.canvas_id]),
             "@type": "sc:Canvas",
             "label": self.label,
             "images": [{
@@ -100,20 +101,27 @@ class Canvas:
         return dump_to_json(self.to_dict())
 
 class ImageResource:
-    def __init__(self, manifest, resource_id, image_url):
+    def __init__(self, manifest, resource_id, image_url, is_link=False):
         self.manifest = manifest
         self.resource_id = resource_id
         self.image_url = image_url
+        self.is_link = is_link
     
     def to_dict(self):
-        resource = {
-            "@id": self.manifest.request.build_absolute_uri(reverse('iiif:resource', args=[self.manifest.manifest_id, 'resource', self.resource_id])),
-            "@type": "dctypes:Image",
-            "service": {
+        if self.is_link:
+            resource = {
                 "@id": self.image_url,
-                "profile": "http://iiif.io/api/image/2/level1.json", 
+                "@type": "dctypes:Image",
             }
-        }
+        else:
+            resource = {
+                "@id": self.manifest.build_url('iiif:resource', [self.manifest.manifest_id, 'resource', self.resource_id]),
+                "@type": "dctypes:Image",
+                "service": {
+                    "@id": self.image_url,
+                    "profile": "http://iiif.io/api/image/2/level1.json", 
+                }
+            }
         return resource
         
     def to_json(self):
