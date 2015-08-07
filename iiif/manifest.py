@@ -16,9 +16,10 @@ class Manifest:
             images = []
         seq = self.add_sequence(1)
         for n, img in enumerate(images, start=1):
-            can = seq.add_canvas(n)
-            can.set_label('Image %d' % n)
-            can.add_image(img['id'], img['url'], img['is_link'])
+            if not img['is_link']:
+                can = seq.add_canvas(n)
+                can.set_label('Image %d' % n)
+                can.add_image(img['id'], img['url'], img['is_link'])
         return self
  
     def add_sequence(self, sequence_id):
@@ -93,7 +94,9 @@ class Canvas:
                 "@type": "oa:Annotation",
                 "resource": self.resource.to_dict(),
                 "on": self.canvas_id,
-            }]
+            }],
+            "width": 100, # TODO: get real width
+            "height": 100, # TODO: get real height
         }
         return canvas
 

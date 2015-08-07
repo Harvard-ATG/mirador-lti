@@ -1,0 +1,38 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <link rel="stylesheet" type="text/css" href="{% static "mirador/css/mirador-combined.css" %}">
+  <title>Mirador Viewer</title>
+  <style type="text/css">
+    body { padding: 0; margin: 0; overflow: hidden; font-size: 70%; }
+    // Here we give the parent definite dimensions, and position fixed, letting it fill the whole browser viewport.
+    #viewer { background: #333 url(mirador/images/debut_dark.png) left top repeat; width: 100%; height: 100%; position: fixed; }
+  </style>
+</head>
+<body>
+  <div id="viewer"></div>
+
+  <script src="{% static "mirador/mirador.js" %}"></script>
+  <script type="text/javascript">
+    
+
+    $(function() {
+      Mirador({
+        "id": "viewer", // The CSS ID selector for the containing element.
+        "layout": "1x1", // The number and arrangement of windows ("row"x"column")?
+        // This data array holds the manifest URIs for the IIIF resources you want Mirador to make available to the user.
+        // Each manifest object must have a manifest URI pointing to a valid IIIF manifest, and may also
+        // provide a location to be displayed in the listing of available manifests.
+        "data": {% autoescape off %}{{ manifest_data_json }}{% endautoescape %}, 
+        
+        // This array allows the user to specify which of the included manifests should appear 
+        // in the workspace, and what the configuration of the window (zoom level, open panels, etc.) 
+        // ought to be.
+        "windowObjects": []
+      });
+    });
+  </script>
+</body>
+</html>
