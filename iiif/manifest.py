@@ -17,7 +17,7 @@ class Manifest:
         seq = self.add_sequence(1)
         for n, img in enumerate(images, start=1):
             if not img['is_link']:
-                can = seq.add_canvas(n)
+                can = seq.add_canvas(img['id'])
                 can.set_label(img['label'])
                 can.add_image(img['id'], img['url'], img['is_link'])
         return self
@@ -75,7 +75,7 @@ class Canvas:
         self.manifest = manifest
         self.canvas_id = canvas_id
         self.label = 'Image'
-        self.resources = []
+        self.resource = None
 
     def add_image(self, image_id, image_url, is_link):
         self.resource = ImageResource(self.manifest, image_id, image_url, is_link)
@@ -85,15 +85,16 @@ class Canvas:
         self.label = label
 
     def to_dict(self):
+        canvas_uri = self.manifest.build_url('iiif:canvas', [self.manifest.manifest_id, 'canvas', self.canvas_id])
         canvas = {
-            "@id": self.manifest.build_url('iiif:canvas', [self.manifest.manifest_id, 'canvas', self.canvas_id]),
+            "@id": canvas_uri,
             "@type": "sc:Canvas",
             "label": self.label,
             "images": [{
                 "@id": "",
                 "@type": "oa:Annotation",
                 "resource": self.resource.to_dict(),
-                "on": self.canvas_id,
+                "on": canvas_uri,
             }],
             "width": 100, # TODO: get real width
             "height": 100, # TODO: get real height
