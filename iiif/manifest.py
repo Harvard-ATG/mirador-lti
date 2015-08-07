@@ -1,6 +1,8 @@
 from django.core.urlresolvers import reverse
-
+from django.conf import settings
 import json
+
+DEBUG = settings.DEBUG
 
 class Manifest:
     def __init__(self, request, manifest_id, **kwargs):
@@ -131,4 +133,6 @@ class ImageResource:
         return dump_to_json(self.to_dict())    
 
 def dump_to_json(obj):
-    return json.dumps(obj, sort_keys=True, indent=4, separators=(',', ': '))
+    if DEBUG:
+        return json.dumps(obj, sort_keys=True, indent=4, separators=(',', ': '))
+    return json.dumps(obj)
