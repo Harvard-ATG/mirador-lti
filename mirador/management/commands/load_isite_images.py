@@ -24,7 +24,6 @@ class Command(BaseCommand):
         
 
     def handle(self, *args, **options):
-        print options
         loader = IsiteImageDataLoader({
             'key': options['aws_key'],
             'secret': options['aws_secret'],
