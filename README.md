@@ -1,4 +1,4 @@
-# mirador_lti 
+# Mirador LTI Tool
 
 ## Quickstart
 
