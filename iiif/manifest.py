@@ -2,9 +2,71 @@ from django.core.urlresolvers import reverse
 from django.conf import settings
 import json
 
-DEBUG = settings.DEBUG
+class IIIFObject:
+    '''
+    IIIF Object is the base object for IIIF presentation classes.
+    
+    This class contains shared behaviors and methods that should be implemented.
+    
+    See also: http://iiif.io/api/presentation/2.0/
+    '''
+    def build_url(self):
+        '''Returns an absolute URL to the object.'''
+        raise Exception("not implemented yet")
 
-class Manifest:
+    def to_dict(self):
+        '''Returns itself as a dictionary.'''
+        raise Exception("not implemented yet")
+
+    def to_json(self):
+        '''Returns itself as JSON.'''
+        obj = self.to_dict()
+        if settings.DEBUG:
+            return json.dumps(obj, sort_keys=True, indent=4, separators=(',', ': '))
+        return json.dumps(obj)
+
+    def __unicode__(self):
+        '''Returns a string representation.'''
+        return self.to_json()    
+
+class Manifest(IIIFObject):
+    '''
+    IIIF Manifest represents a collection of images and defines the overall structure
+    of the collection.
+
+    A Manifest object is composed of Sequence, Canvas, and ImageResource objects:
+    
+    Manifest
+        Sequence
+            Canvas
+                ImageResource
+            Canvas
+                ImageResource
+            Canvas
+                ImageResource
+    
+    Each object must have a unique ID that can be mapped to a URL. For this implementation:
+    
+        -the Manifest may be uniquely identified by the course ID.
+        -the Sequence may be uniquely identified by "1" because there is only
+         one Sequence in this implementation.
+        -the Canvas may be uniquely identified by the image ID because
+         Canvas:ImageResource is 1:1 in this implementation.
+        -the ImageResource may be uniquely identified by the image ID.
+
+    This is intended to be a minimal implementation of the IIIF 2.0 Presentation specification,
+    so not all features are supported. 
+    
+    Usage:
+    
+    manifest = Manifest(request, 1)
+    manifest.create(images=[
+        {'id': 1, 'is_link': False, 'url': 'http://localhost:8000/loris/foo.jpg'},
+        {'id': 2, 'is_link': False, 'url': 'http://localhost:8000/loris/bar.jpg'}
+    ])
+    output = manifest.to_json()
+    print output
+    '''
     def __init__(self, request, manifest_id, **kwargs):
         self.request = request
         self.id = manifest_id
@@ -27,28 +89,44 @@ class Manifest:
         sequence = Sequence(self, sequence_id)
         self.sequences.append(sequence)
         return sequence
+    
+    def find_object(self, object_type, object_id):
+        if object_type == "manifest":
+            if object_id == self.id:
+                return self
+        elif object_type == "sequence":
+            for s in self.sequences:
+                if object_id == s.id:
+                    return s
+        elif object_type == "canvas":
+            for c in self.sequences[0].canvases:
+                if object_id == c.id:
+                    return c
+        elif object_type == "resource":
+            for c in self.sequences[0].canvases:
+                if object_id == c.resource.id:
+                    return c.resource
+        return None
+    
+    def build_absolute_uri(self, url_name, url_args):
+        reversed_url = reverse(url_name, args=url_args)
+        return self.request.build_absolute_uri(reversed_url)
+
+    def build_url(self):
+        return self.build_absolute_uri('iiif:manifest', [self.id])
 
     def to_dict(self):
         manifest = {
             "@context": "http://iiif.io/api/presentation/2/context.json",
             "@type": "sc:Manifest",
-            "@id": self.build_url('iiif:manifest', [self.id]),
+            "@id": self.build_url(),
             "label": self.label,
             "description": self.description,
             "sequences": [sequence.to_dict() for sequence in self.sequences]
         }
         return manifest
-    
-    def build_url(self, url_name, url_args):
-        return self.request.build_absolute_uri(reverse(url_name, args=url_args))
 
-    def to_json(self):
-        return dump_to_json(self.to_dict())
-    
-    def __str__(self):
-        return self.to_json()
-
-class Sequence:
+class Sequence(IIIFObject):
     def __init__(self, manifest, sequence_id):
         self.manifest = manifest
         self.id = sequence_id
@@ -60,7 +138,7 @@ class Sequence:
         return canvas
     
     def build_url(self):
-        return self.manifest.build_url('iiif:sequence', [self.manifest.id, 'sequence', self.id])
+        return self.manifest.build_absolute_uri('iiif:sequence', [self.manifest.id, 'sequence', self.id])
 
     def to_dict(self):
         sequence = {
@@ -71,10 +149,7 @@ class Sequence:
         }
         return sequence
 
-    def to_json(self):
-        return dump_to_json(self.to_dict())
-
-class Canvas:
+class Canvas(IIIFObject):
     def __init__(self, manifest, canvas_id):
         self.manifest = manifest
         self.id = canvas_id
@@ -89,7 +164,7 @@ class Canvas:
         self.label = label
         
     def build_url(self):
-        return self.manifest.build_url('iiif:canvas', [self.manifest.id, 'canvas', self.id])
+        return self.manifest.build_absolute_uri('iiif:canvas', [self.manifest.id, 'canvas', self.id])
 
     def to_dict(self):
         canvas = {
@@ -97,7 +172,6 @@ class Canvas:
             "@type": "sc:Canvas",
             "label": self.label,
             "images": [{
-                "@id": "",
                 "@type": "oa:Annotation",
                 "resource": self.resource.to_dict(),
                 "on": self.build_url(),
@@ -107,10 +181,7 @@ class Canvas:
         }
         return canvas
 
-    def to_json(self):
-        return dump_to_json(self.to_dict())
-
-class ImageResource:
+class ImageResource(IIIFObject):
     def __init__(self, manifest, resource_id, image_url, is_link=False):
         self.manifest = manifest
         self.id = resource_id
@@ -118,7 +189,7 @@ class ImageResource:
         self.is_link = is_link
         
     def build_url(self):
-        return self.manifest.build_url('iiif:resource', [self.manifest.id, 'resource', self.id])
+        return self.manifest.build_absolute_uri('iiif:resource', [self.manifest.id, 'resource', self.id])
 
     def to_dict(self):
         if self.is_link:
@@ -136,11 +207,3 @@ class ImageResource:
                 }
             }
         return resource
-        
-    def to_json(self):
-        return dump_to_json(self.to_dict())    
-
-def dump_to_json(obj):
-    if DEBUG:
-        return json.dumps(obj, sort_keys=True, indent=4, separators=(',', ': '))
-    return json.dumps(obj)

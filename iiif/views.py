@@ -16,7 +16,6 @@ def manifest(request, *args):
     See also: http://iiif.io/api/presentation/2.0/
     See also: https://github.com/IIIF/mirador
     '''
-    
     if len(args) == 0:
         raise Http404
 
@@ -25,33 +24,14 @@ def manifest(request, *args):
 
     if len(args) == 1:
         return HttpResponse(manifest.to_json(), content_type="application/json")
-
     elif len(args) == 3:
         object_type = args[1]
         object_id = int(args[2])
-        #print object_type, object_id
-        
-        if object_type == "sequence":
-            sequences = manifest.sequences
-            for s in sequences:
-                if s.id == object_id:
-                    return HttpResponse(s.to_json(), content_type="application/json") 
-            raise Http404
-
-        elif object_type == "canvas":
-            canvases = manifest.sequences[0].canvases
-            for c in canvases:
-                if c.id == object_id:
-                    return HttpResponse(c.to_json(), content_type="application/json")
-        
-        elif object_type == "resource":
-            canvases = manifest.sequences[0].canvases
-            for c in canvases:
-                if c.resource.id == object_id:
-                    return HttpResponse(c.resource.to_json(), content_type="application/json")
+        result = manifest.find_object(object_type, object_id)
+        if result is not None:
+            return HttpResponse(result.to_json(), content_type="application/json")
 
     raise Http404
-
 
 def _manifest(request, course_id):
     '''Returns a Manifest object that has been instantiated and populated with images.'''
@@ -65,21 +45,23 @@ def _manifest(request, course_id):
 def _get_images(request, course_id):
     '''Returns a list of images [(id, is_link, label), ...] that belong to a manifest.'''
     lti_course = LTICourseImages.get_lti_course(course_id)
-    lti_course_images = LTICourseImages.objects.select_related().filter(course=lti_course)   
-
+    lti_course_images = LTICourseImages.objects.select_related().filter(course=lti_course)
     manifest_images = []
 
     for c in lti_course_images:
         manifest_img = {
             'id': c.isite_image.id,
             'is_link': c.isite_image.isite_file_type == 'link',
-            'label': c.isite_image.isite_file_title
+            'label': c.isite_image.isite_file_title,
+            'url': '',
         }
-
+ 
         if c.isite_image.isite_file_type == 'file':
             manifest_img['url'] = settings.IIIF_IMAGE_SERVER_URL + c.isite_image.s3_key
-        else:
+        elif c.isite_image.isite_file_type == 'link':
             manifest_img['url'] = c.isite_image.isite_file_url
+        else:
+            raise Exception("unknown image file type: %s" % c.isite_image.isite_file_type)
 
         manifest_images.append(manifest_img)
 
