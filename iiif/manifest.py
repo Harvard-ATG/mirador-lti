@@ -7,7 +7,7 @@ DEBUG = settings.DEBUG
 class Manifest:
     def __init__(self, request, manifest_id, **kwargs):
         self.request = request
-        self.manifest_id = manifest_id
+        self.id = manifest_id
         self.label = kwargs.get('label', '')
         self.description = kwargs.get('description', '')
         self.sequences = []
@@ -32,7 +32,7 @@ class Manifest:
         manifest = {
             "@context": "http://iiif.io/api/presentation/2/context.json",
             "@type": "sc:Manifest",
-            "@id": self.build_url('iiif:manifest', [self.manifest_id]),
+            "@id": self.build_url('iiif:manifest', [self.id]),
             "label": self.label,
             "description": self.description,
             "sequences": [sequence.to_dict() for sequence in self.sequences]
@@ -60,7 +60,7 @@ class Sequence:
         return canvas
     
     def build_url(self):
-        return self.manifest.build_url('iiif:sequence', [self.manifest.manifest_id, 'sequence', self.id])
+        return self.manifest.build_url('iiif:sequence', [self.manifest.id, 'sequence', self.id])
 
     def to_dict(self):
         sequence = {
@@ -89,7 +89,7 @@ class Canvas:
         self.label = label
         
     def build_url(self):
-        return self.manifest.build_url('iiif:canvas', [self.manifest.manifest_id, 'canvas', self.id])
+        return self.manifest.build_url('iiif:canvas', [self.manifest.id, 'canvas', self.id])
 
     def to_dict(self):
         canvas = {
@@ -118,7 +118,7 @@ class ImageResource:
         self.is_link = is_link
         
     def build_url(self):
-        return self.manifest.build_url('iiif:resource', [self.manifest.manifest_id, 'resource', self.id])
+        return self.manifest.build_url('iiif:resource', [self.manifest.id, 'resource', self.id])
 
     def to_dict(self):
         if self.is_link:
