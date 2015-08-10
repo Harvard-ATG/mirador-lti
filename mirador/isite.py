@@ -11,10 +11,11 @@ def assign_images(course_id, keyword, **kwargs):
     Optionally specify topic_id to map course images to (keyword, topic_id).
     '''
     log = kwargs.get('logger', logging.getLogger(__file__))
+    topic_id = kwargs.get('topic_id', None)
 
     filter_by = {'isite_keyword': keyword}
-    if kwargs['topic_id'] is not None:
-        filter_by['isite_topic_id'] = kwargs['topic_id']
+    if topic_id is not None:
+        filter_by['isite_topic_id'] = topic_id
 
     lti_course = LTICourseImages.get_lti_course(course_id)
     log.info('Found LTI course: %s' % lti_course)
