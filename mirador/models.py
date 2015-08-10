@@ -25,6 +25,10 @@ class LTICourseImages(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
+    @classmethod
+    def get_lti_course(self, course_id):
+        return LTICourse.objects.get(pk=course_id)
+
     class Meta:
         verbose_name = 'LTI Course Images'
         verbose_name_plural = 'LTI Course Images'
