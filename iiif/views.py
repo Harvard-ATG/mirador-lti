@@ -29,25 +29,25 @@ def manifest(request, *args):
     elif len(args) == 3:
         object_type = args[1]
         object_id = int(args[2])
-        print object_type, object_id
+        #print object_type, object_id
         
         if object_type == "sequence":
             sequences = manifest.sequences
             for s in sequences:
-                if s.sequence_id == object_id:
+                if s.id == object_id:
                     return HttpResponse(s.to_json(), content_type="application/json") 
             raise Http404
 
         elif object_type == "canvas":
             canvases = manifest.sequences[0].canvases
             for c in canvases:
-                if c.canvas_id == object_id:
+                if c.id == object_id:
                     return HttpResponse(c.to_json(), content_type="application/json")
         
         elif object_type == "resource":
             canvases = manifest.sequences[0].canvases
             for c in canvases:
-                if c.resource.resource_id == object_id:
+                if c.resource.id == object_id:
                     return HttpResponse(c.resource.to_json(), content_type="application/json")
 
     raise Http404
