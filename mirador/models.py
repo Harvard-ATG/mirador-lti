@@ -32,7 +32,7 @@ class LTICourseCollections(models.Model):
         return "%s - %s" % (self.id, self.label)
 
     class Meta:
-        ordering = ['id']
+        ordering = ['sort_order']
         verbose_name = 'LTI Course Collection'
         verbose_name_plural = 'LTI Course Collections'
 

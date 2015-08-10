@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.core.urlresolvers import reverse
-from .models import LTICourseImages
+from .models import LTICourseImages, LTICourseCollections
 import json
 
 def _build_manifest_uri(request, manifest_id):
@@ -19,10 +19,13 @@ def index(request, course_id):
     }]
 
     # Add manifest for each collection of images
-    collections = LTICourseImages.objects.values('collection').distinct()
+    collection_ids = LTICourseImages.objects.filter(course__id=course_id).distinct().values_list('collection', flat=True)
+    collections = []
+    if len(collection_ids) > 0:
+        collections = LTICourseCollections.objects.filter(id__in=collection_ids).order_by('sort_order', 'label')
+
     for collection in collections:
-        collection_id = collection['collection']
-        manifest_id = "%s:%s" % (course_id, collection_id)
+        manifest_id = "%s:%s" % (course_id, collection.id)
         manifests.append({
             "manifestUri": _build_manifest_uri(request, manifest_id),
             "location": "Harvard University",
