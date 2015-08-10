@@ -20,8 +20,8 @@ def manifest(request, *args):
     if len(args) == 0:
         raise Http404
 
-    manifest_id = args[0]
-    manifest = _manifest(request, manifest_id)
+    course_id = args[0]
+    manifest = _manifest(request, course_id)
 
     if len(args) == 1:
         return HttpResponse(manifest.to_json(), content_type="application/json")
@@ -53,29 +53,33 @@ def manifest(request, *args):
     raise Http404
 
 
-def _manifest(request, manifest_id):
+def _manifest(request, course_id):
     '''Returns a Manifest object that has been instantiated and populated with images.'''
-    images = _get_images(request, manifest_id)
-    manifest = Manifest(request, manifest_id, label='Manifest', description='Manifest of course images')
+    images = _get_images(request, course_id)
+    #print "course_id=%s images=%s" % (course_id, len(images))
+    
+    manifest = Manifest(request, course_id, label='Manifest', description='Manifest of course images')
     manifest.create(images=images)
     return manifest
 
-def _get_images(request, manifest_id):
+def _get_images(request, course_id):
     '''Returns a list of images [(id, is_link, label), ...] that belong to a manifest.'''
-    isite_images = IsiteImages.objects.all()
+    lti_course = LTICourseImages.get_lti_course(course_id)
+    lti_course_images = LTICourseImages.objects.select_related().filter(course=lti_course)   
+
     manifest_images = []
 
-    for img in isite_images:
+    for c in lti_course_images:
         manifest_img = {
-            'id': img.id,
-            'is_link': img.isite_file_type == 'link',
-            'label': img.isite_file_title
+            'id': c.isite_image.id,
+            'is_link': c.isite_image.isite_file_type == 'link',
+            'label': c.isite_image.isite_file_title
         }
 
-        if img.isite_file_type == 'file':
-            manifest_img['url'] = settings.IIIF_IMAGE_SERVER_URL + img.s3_key
+        if c.isite_image.isite_file_type == 'file':
+            manifest_img['url'] = settings.IIIF_IMAGE_SERVER_URL + c.isite_image.s3_key
         else:
-            manifest_img['url'] = img.isite_file_url
+            manifest_img['url'] = c.isite_image.isite_file_url
 
         manifest_images.append(manifest_img)
 

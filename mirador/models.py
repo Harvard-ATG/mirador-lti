@@ -12,7 +12,10 @@ class IsiteImages(models.Model):
     s3_key = models.CharField(max_length=4096, null=True)
     s3_bucket = models.CharField(max_length=128, null=True)
     created = models.DateTimeField(auto_now_add=True)
-    updated = models.DateTimeField(auto_now=True) 
+    updated = models.DateTimeField(auto_now=True)
+    
+    def __unicode__(self):
+        return "%s/%s/%s" % (self.isite_keyword, self.isite_topic_id, self.isite_file_name)
 
     class Meta:
         ordering = ['id']
@@ -24,6 +27,9 @@ class LTICourseImages(models.Model):
     isite_image = models.ForeignKey(IsiteImages)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
+
+    def __unicode__(self):
+        return "%s: %s" % (self.course, self.isite_image)
 
     @classmethod
     def get_lti_course(self, course_id):

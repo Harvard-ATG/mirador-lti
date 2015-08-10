@@ -51,17 +51,20 @@ class Manifest:
 class Sequence:
     def __init__(self, manifest, sequence_id):
         self.manifest = manifest
-        self.sequence_id = sequence_id
+        self.id = sequence_id
         self.canvases = []
 
     def add_canvas(self, canvas_id):
         canvas = Canvas(self.manifest, canvas_id)
         self.canvases.append(canvas)
         return canvas
+    
+    def build_url(self):
+        return self.manifest.build_url('iiif:sequence', [self.manifest.manifest_id, 'sequence', self.id])
 
     def to_dict(self):
         sequence = {
-            "@id": self.manifest.build_url('iiif:sequence', [self.manifest.manifest_id, 'sequence', self.sequence_id]),
+            "@id": self.build_url(),
             "@type": "sc:Sequence",
             "label": "Default order",
             "canvases": [canvas.to_dict() for canvas in self.canvases],
@@ -74,7 +77,7 @@ class Sequence:
 class Canvas:
     def __init__(self, manifest, canvas_id):
         self.manifest = manifest
-        self.canvas_id = canvas_id
+        self.id = canvas_id
         self.label = 'Image'
         self.resource = None
 
@@ -84,18 +87,20 @@ class Canvas:
     
     def set_label(self, label):
         self.label = label
+        
+    def build_url(self):
+        return self.manifest.build_url('iiif:canvas', [self.manifest.manifest_id, 'canvas', self.id])
 
     def to_dict(self):
-        canvas_uri = self.manifest.build_url('iiif:canvas', [self.manifest.manifest_id, 'canvas', self.canvas_id])
         canvas = {
-            "@id": canvas_uri,
+            "@id": self.build_url(),
             "@type": "sc:Canvas",
             "label": self.label,
             "images": [{
                 "@id": "",
                 "@type": "oa:Annotation",
                 "resource": self.resource.to_dict(),
-                "on": canvas_uri,
+                "on": self.build_url(),
             }],
             "width": 100, # TODO: get real width
             "height": 100, # TODO: get real height
@@ -108,10 +113,13 @@ class Canvas:
 class ImageResource:
     def __init__(self, manifest, resource_id, image_url, is_link=False):
         self.manifest = manifest
-        self.resource_id = resource_id
+        self.id = resource_id
         self.image_url = image_url
         self.is_link = is_link
-    
+        
+    def build_url(self):
+        return self.manifest.build_url('iiif:resource', [self.manifest.manifest_id, 'resource', self.id])
+
     def to_dict(self):
         if self.is_link:
             resource = {
@@ -120,7 +128,7 @@ class ImageResource:
             }
         else:
             resource = {
-                "@id": self.manifest.build_url('iiif:resource', [self.manifest.manifest_id, 'resource', self.resource_id]),
+                "@id": self.build_url(),
                 "@type": "dctypes:Image",
                 "service": {
                     "@id": self.image_url,
