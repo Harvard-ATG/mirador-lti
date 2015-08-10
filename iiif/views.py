@@ -3,9 +3,9 @@ from django.core.urlresolvers import reverse
 from django.conf import settings
 import json
 from manifest import Manifest
-from mirador.models import IsiteImages, LTICourseImages
+from mirador.models import IsiteImages, LTICourseImages, LTICourseCollections
 
-def manifest(request, *args):
+def manifest(request, **kwargs):
     '''
     Returns JSON output to render a IIIF manifest of images that belong to a course.
     
@@ -16,36 +16,55 @@ def manifest(request, *args):
     See also: http://iiif.io/api/presentation/2.0/
     See also: https://github.com/IIIF/mirador
     '''
-    if len(args) == 0:
+    manifest_id = kwargs.get('manifest_id', None)
+    object_type = kwargs.get('object_type', None)
+    object_id = kwargs.get('object_id', None)
+
+    if manifest_id is None or object_type is None:
         raise Http404
 
-    course_id = args[0]
-    manifest = _manifest(request, course_id)
+    manifest = _manifest(request, manifest_id)
 
-    if len(args) == 1:
+    if object_type == 'manifest':
         return HttpResponse(manifest.to_json(), content_type="application/json")
-    elif len(args) == 3:
-        object_type = args[1]
-        object_id = int(args[2])
-        result = manifest.find_object(object_type, object_id)
-        if result is not None:
-            return HttpResponse(result.to_json(), content_type="application/json")
+    else:
+        if object_id is not None:
+            result = manifest.find_object(object_type, object_id)
+            if result is not None:
+                return HttpResponse(result.to_json(), content_type="application/json")
 
     raise Http404
 
-def _manifest(request, course_id):
+def _manifest(request, manifest_id):
     '''Returns a Manifest object that has been instantiated and populated with images.'''
-    images = _get_images(request, course_id)
-    #print "course_id=%s images=%s" % (course_id, len(images))
-    
-    manifest = Manifest(request, course_id, label='Manifest', description='Manifest of course images')
+    ids = manifest_id.split(':', 2)
+    course_id = ids[0]
+    collection_id = None
+    manifest_label = 'Manifest'
+    manifest_description = 'Manifest of course images'
+    if len(ids) == 2:
+        collection_id = ids[1]
+        collection = LTICourseCollections.objects.get(pk=collection_id)
+        manifest_label = collection.label
+        manifest_description = "Manifest of images for collection %s" % collection.label
+
+    images = _get_images(request, course_id, collection_id)
+    #print "manifest_id=%s course_id=%s collection_id=%s images=%s" % (manifest_id, course_id, collection_id, len(images))
+
+    manifest = Manifest(request, manifest_id, label=manifest_label, description=manifest_description)
     manifest.create(images=images)
+
     return manifest
 
-def _get_images(request, course_id):
+def _get_images(request, course_id, collection_id):
     '''Returns a list of images [(id, is_link, label), ...] that belong to a manifest.'''
     lti_course = LTICourseImages.get_lti_course(course_id)
-    lti_course_images = LTICourseImages.objects.select_related().filter(course=lti_course)
+
+    filter_by = {'course':lti_course}
+    if collection_id is not None:
+        filter_by['collection__id'] = collection_id
+
+    lti_course_images = LTICourseImages.objects.select_related().filter(**filter_by)
     manifest_images = []
 
     for c in lti_course_images:

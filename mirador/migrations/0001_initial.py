@@ -28,9 +28,24 @@ class Migration(migrations.Migration):
                 ('updated', models.DateTimeField(auto_now=True)),
             ],
             options={
-                'ordering': ['isite_keyword', 'isite_topic_id', 'isite_file_type', 'isite_file_name'],
+                'ordering': ['id'],
                 'verbose_name': 'Isite Image',
                 'verbose_name_plural': 'Isite Images',
+            },
+        ),
+        migrations.CreateModel(
+            name='LTICourseCollections',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('label', models.CharField(max_length=128)),
+                ('sort_order', models.IntegerField(default=0)),
+                ('created', models.DateTimeField(auto_now_add=True)),
+                ('updated', models.DateTimeField(auto_now=True)),
+            ],
+            options={
+                'ordering': ['id'],
+                'verbose_name': 'LTI Course Collection',
+                'verbose_name_plural': 'LTI Course Collections',
             },
         ),
         migrations.CreateModel(
@@ -39,6 +54,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('updated', models.DateTimeField(auto_now=True)),
+                ('collection', models.ForeignKey(to='mirador.LTICourseCollections', null=True)),
                 ('course', models.ForeignKey(to='django_app_lti.LTICourse')),
                 ('isite_image', models.ForeignKey(to='mirador.IsiteImages')),
             ],

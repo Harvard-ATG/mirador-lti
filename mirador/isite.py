@@ -1,6 +1,6 @@
 from boto.s3.connection import S3Connection
 from boto.s3.key import Key
-from .models import IsiteImages, LTICourseImages
+from .models import IsiteImages, LTICourseImages, LTICourseCollections
 
 import logging
 import json
@@ -25,8 +25,21 @@ def assign_images(course_id, keyword, **kwargs):
 
     isite_images = IsiteImages.objects.filter(**filter_by)
     log.info('Preparing to assign images: %s' % len(isite_images))
+    
+    collection_map = {}
+    course_image_records = []
+    for n, isite_image in enumerate(isite_images):
+        keyword = isite_image.isite_keyword
+        topic_id = isite_image.isite_topic_id
+        if topic_id in collection_map:
+            collection = collection_map[topic_id]
+        else:
+            collection = LTICourseCollections(sort_order=len(collection_map.keys()), label="%s: %s" % (keyword, topic_id))
+            collection.save()
+            collection_map[topic_id] = collection
+            log.info('Created collection %s' % collection)
+        course_image_records.append(LTICourseImages(course=lti_course, collection=collection, isite_image=isite_image))
 
-    course_image_records = [LTICourseImages(course=lti_course, isite_image=m) for m in isite_images]
     LTICourseImages.objects.bulk_create(course_image_records)
     log.info('Assigned %s images to course: %s' % (len(course_image_records), lti_course))
 
