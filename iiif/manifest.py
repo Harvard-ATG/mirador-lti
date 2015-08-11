@@ -109,11 +109,14 @@ class Manifest(IIIFObject):
         return None
     
     def build_absolute_uri(self, url_name, url_args):
-        reversed_url = reverse(url_name, args=url_args)
+        reversed_url = reverse(url_name, kwargs=url_args)
         return self.request.build_absolute_uri(reversed_url)
 
     def build_url(self):
-        return self.build_absolute_uri('iiif:manifest', [self.id])
+        return self.build_absolute_uri('iiif:manifest', {
+            'manifest_id': self.id,
+            'object_type': 'manifest',
+        })
 
     def to_dict(self):
         manifest = {
@@ -138,7 +141,11 @@ class Sequence(IIIFObject):
         return canvas
     
     def build_url(self):
-        return self.manifest.build_absolute_uri('iiif:sequence', [self.manifest.id, 'sequence', self.id])
+        return self.manifest.build_absolute_uri('iiif:sequence', {
+            'manifest_id': self.manifest.id,
+            'object_type': 'sequence',
+            'object_id': self.id
+        })
 
     def to_dict(self):
         sequence = {
@@ -164,7 +171,11 @@ class Canvas(IIIFObject):
         self.label = label
         
     def build_url(self):
-        return self.manifest.build_absolute_uri('iiif:canvas', [self.manifest.id, 'canvas', self.id])
+        return self.manifest.build_absolute_uri('iiif:canvas', {
+            'manifest_id': self.manifest.id,
+            'object_type': 'canvas',
+            'object_id': self.id
+        })
 
     def to_dict(self):
         canvas = {
@@ -189,7 +200,11 @@ class ImageResource(IIIFObject):
         self.is_link = is_link
         
     def build_url(self):
-        return self.manifest.build_absolute_uri('iiif:resource', [self.manifest.id, 'resource', self.id])
+        return self.manifest.build_absolute_uri('iiif:resource', {
+            'manifest_id': self.manifest.id,
+            'object_type': 'resource',
+            'object_id': self.id
+        })
 
     def to_dict(self):
         if self.is_link:

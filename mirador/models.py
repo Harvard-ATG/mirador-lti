@@ -21,15 +21,30 @@ class IsiteImages(models.Model):
         ordering = ['id']
         verbose_name = 'Isite Image'
         verbose_name_plural = 'Isite Images'
-        
+
+class LTICourseCollections(models.Model):
+    label = models.CharField(max_length=128)
+    sort_order = models.IntegerField(null=False, default=0)
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    def __unicode__(self):
+        return "%s - %s" % (self.id, self.label)
+
+    class Meta:
+        ordering = ['sort_order']
+        verbose_name = 'LTI Course Collection'
+        verbose_name_plural = 'LTI Course Collections'
+
 class LTICourseImages(models.Model):
     course = models.ForeignKey(LTICourse)
+    collection = models.ForeignKey(LTICourseCollections, null=True)
     isite_image = models.ForeignKey(IsiteImages)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
     def __unicode__(self):
-        return "%s: %s" % (self.course, self.isite_image)
+        return "%s - %s" % (self.collection, self.isite_image)
 
     @classmethod
     def get_lti_course(self, course_id):
