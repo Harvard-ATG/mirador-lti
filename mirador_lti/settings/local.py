@@ -2,7 +2,7 @@
 from .base import *
 
 ALLOWED_HOSTS = ['localhost']
-
+SECRET_KEY = 'foo'
 
 SECRET_KEY = SECURE_SETTINGS.get('django_secret_key')
 LTI_OAUTH_CREDENTIALS = SECURE_SETTINGS.get('lti_oauth_credentials', {})
