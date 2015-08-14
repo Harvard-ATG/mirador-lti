@@ -1,15 +1,9 @@
 # to activate these settings, execute ./manage.py runserver --settings=mirador.settings.local
 from .base import *
 
-LTI_DEBUG = True
-DEBUG = True
-TEMPLATE_DEBUG = True
+ALLOWED_HOSTS = ['localhost']
 
-ENV_NAME = 'local'
 
-# For Django Debug Toolbar:
-INTERNAL_IPS = ('127.0.0.1', '10.0.2.2',)
-DEBUG = SECURE_SETTINGS.get('enable_debug', True)
-DEBUG_TOOLBAR_CONFIG = {
-    'INTERCEPT_REDIRECTS': False,
-}
+SECRET_KEY = SECURE_SETTINGS.get('django_secret_key')
+LTI_OAUTH_CREDENTIALS = SECURE_SETTINGS.get('lti_oauth_credentials', {})
+IIIF_IMAGE_SERVER_URL = SECURE_SETTINGS.get('iiif_image_server_url', 'http://localhost:8000/loris/')
