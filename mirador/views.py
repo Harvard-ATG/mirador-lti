@@ -2,6 +2,7 @@ from django.conf import settings
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.http import Http404
+from django.contrib.auth.decorators import user_passes_test
 from django.core.urlresolvers import reverse
 from .models import LTICourseImages, LTICourseCollections
 from mirador.isite import IsiteImageDataLoader, iSiteImageDataSource, assign_images
@@ -39,6 +40,7 @@ def index(request, course_id):
 
     return render(request, 'mirador.html', {"manifests_json": json.dumps(manifests)})
 
+@user_passes_test(lambda u: u.is_superuser)
 def import_api_load(request):
     logger = logging.getLogger(__file__)
     log_capture_string = StringIO.StringIO()
@@ -66,6 +68,7 @@ def import_api_load(request):
 
     return HttpResponse(log_contents, content_type="text/plain")
 
+@user_passes_test(lambda u: u.is_superuser)
 def import_api_assign(request):
     logger = logging.getLogger(__file__)
     log_capture_string = StringIO.StringIO()
