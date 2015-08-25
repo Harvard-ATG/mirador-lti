@@ -21,3 +21,6 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
 LTI_OAUTH_CREDENTIALS = json.loads(os.environ.get('LTI_OAUTH_CREDENTIALS'))
 IIIF_IMAGE_SERVER_URL = os.environ.get('IIIF_IMAGE_SERVER_URL')
+AWS_KEY = os.environ.get('AWS_KEY')
+AWS_SECRET = os.environ.get('AWS_SECRET')
+S3_BUCKET = os.environ.get('S3_BUCKET')

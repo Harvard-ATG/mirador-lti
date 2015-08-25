@@ -65,6 +65,8 @@ class IsiteImageDataLoader:
     '''
     
     def __init__(self, aws_credentials, logger=None):
+        if 'bucket' not in aws_credentials:
+            raise Exception("missing 'bucket' key in aws_credentials")
         self.s3_bucket = aws_credentials['bucket']
         self.can_save = False
         if logger is None:
@@ -196,6 +198,15 @@ class iSiteImageDataSource:
 
     def connect_to_s3(self, aws_credentials):
         '''Connects to the S3 bucket given AWS credentials for the key, secret.'''
+        errors = []
+        for k in ('key', 'secret'):
+            if k not in aws_credentials:
+                errors.append("missing key %s" % k)
+            elif aws_credentials[k] is None or aws_credentials[k] == "":
+                errors.append("key is empty: %s" % k)
+        if len(errors) > 0:
+            raise Exception("Error(s) connecting to S3: " + ", ".join(errors))
+
         self.conn = S3Connection(aws_credentials['key'], aws_credentials['secret'])
         self.bucket = self.conn.get_bucket(aws_credentials['bucket'])
         self.log.debug("Connected to S3 bucket %s via AWS key %s" % (aws_credentials['bucket'], aws_credentials['key']))
