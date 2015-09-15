@@ -4,7 +4,7 @@ import logging
 
 class Command(BaseCommand):
     def add_arguments(self, parser):
-        parser.add_argument('course_id', help="LTI Course ID") 
+        parser.add_argument('resource_id', help="LTI Resource ID") 
         parser.add_argument('keyword', help="iSite keyword")
         parser.add_argument('--topic_id', help="iSite topic_id")
 
@@ -14,4 +14,4 @@ class Command(BaseCommand):
         logger.addHandler(ch)
         logger.setLevel(logging.DEBUG)
 
-        assign_images(options['course_id'], options['keyword'], topic_id=options['topic_id'], logger=logger)
+        assign_images(options['resource_id'], options['keyword'], topic_id=options['topic_id'], logger=logger)

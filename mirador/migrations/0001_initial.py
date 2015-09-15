@@ -20,6 +20,8 @@ class Migration(migrations.Migration):
                 ('isite_file_url', models.CharField(max_length=4096)),
                 ('isite_file_title', models.CharField(max_length=2048, null=True, blank=True)),
                 ('isite_file_description', models.TextField(null=True, blank=True)),
+                ('isite_site_title', models.CharField(max_length=4096)),
+                ('isite_topic_title', models.CharField(max_length=4096)),
                 ('isite_topic_id', models.CharField(max_length=128)),
                 ('isite_keyword', models.CharField(max_length=128)),
                 ('s3_key', models.CharField(max_length=4096, null=True)),
@@ -34,7 +36,7 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.CreateModel(
-            name='LTICourseCollections',
+            name='LTIResourceCollections',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('label', models.CharField(max_length=128)),
@@ -43,24 +45,24 @@ class Migration(migrations.Migration):
                 ('updated', models.DateTimeField(auto_now=True)),
             ],
             options={
-                'ordering': ['id'],
-                'verbose_name': 'LTI Course Collection',
-                'verbose_name_plural': 'LTI Course Collections',
+                'ordering': ['sort_order'],
+                'verbose_name': 'LTI Resource Collection',
+                'verbose_name_plural': 'LTI Resource Collections',
             },
         ),
         migrations.CreateModel(
-            name='LTICourseImages',
+            name='LTIResourceImages',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('updated', models.DateTimeField(auto_now=True)),
-                ('collection', models.ForeignKey(to='mirador.LTICourseCollections', null=True)),
-                ('course', models.ForeignKey(to='django_app_lti.LTICourse')),
+                ('collection', models.ForeignKey(to='mirador.LTIResourceCollections', null=True)),
                 ('isite_image', models.ForeignKey(to='mirador.IsiteImages')),
+                ('resource', models.ForeignKey(to='django_app_lti.LTIResource')),
             ],
             options={
-                'verbose_name': 'LTI Course Images',
-                'verbose_name_plural': 'LTI Course Images',
+                'verbose_name': 'LTI Resource Images',
+                'verbose_name_plural': 'LTI Resource Images',
             },
         ),
     ]

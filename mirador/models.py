@@ -1,5 +1,5 @@
 from django.db import models
-from django_app_lti.models import LTICourse
+from django_app_lti.models import LTIResource
 
 class IsiteImages(models.Model):
     isite_file_type = models.CharField(max_length=64)
@@ -7,6 +7,8 @@ class IsiteImages(models.Model):
     isite_file_url = models.CharField(max_length=4096)
     isite_file_title = models.CharField(max_length=2048, null=True, blank=True)
     isite_file_description = models.TextField(null=True, blank=True)
+    isite_site_title = models.CharField(max_length=4096)
+    isite_topic_title = models.CharField(max_length=4096)
     isite_topic_id = models.CharField(max_length=128)
     isite_keyword = models.CharField(max_length=128)
     s3_key = models.CharField(max_length=4096, null=True)
@@ -22,7 +24,7 @@ class IsiteImages(models.Model):
         verbose_name = 'Isite Image'
         verbose_name_plural = 'Isite Images'
 
-class LTICourseCollections(models.Model):
+class LTIResourceCollections(models.Model):
     label = models.CharField(max_length=128)
     sort_order = models.IntegerField(null=False, default=0)
     created = models.DateTimeField(auto_now_add=True)
@@ -33,12 +35,12 @@ class LTICourseCollections(models.Model):
 
     class Meta:
         ordering = ['sort_order']
-        verbose_name = 'LTI Course Collection'
-        verbose_name_plural = 'LTI Course Collections'
+        verbose_name = 'LTI Resource Collection'
+        verbose_name_plural = 'LTI Resource Collections'
 
-class LTICourseImages(models.Model):
-    course = models.ForeignKey(LTICourse)
-    collection = models.ForeignKey(LTICourseCollections, null=True)
+class LTIResourceImages(models.Model):
+    resource = models.ForeignKey(LTIResource)
+    collection = models.ForeignKey(LTIResourceCollections, null=True)
     isite_image = models.ForeignKey(IsiteImages)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
@@ -47,9 +49,9 @@ class LTICourseImages(models.Model):
         return "%s - %s" % (self.collection, self.isite_image)
 
     @classmethod
-    def get_lti_course(self, course_id):
-        return LTICourse.objects.get(pk=course_id)
+    def get_lti_resource(self, resource_id):
+        return LTIResource.objects.get(pk=resource_id)
 
     class Meta:
-        verbose_name = 'LTI Course Images'
-        verbose_name_plural = 'LTI Course Images'
+        verbose_name = 'LTI Resource Images'
+        verbose_name_plural = 'LTI Resource Images'

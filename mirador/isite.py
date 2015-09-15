@@ -1,14 +1,14 @@
 from boto.s3.connection import S3Connection
 from boto.s3.key import Key
-from .models import IsiteImages, LTICourseImages, LTICourseCollections
+from .models import IsiteImages, LTIResourceImages, LTIResourceCollections
 
 import logging
 import json
 
-def assign_images(course_id, keyword, **kwargs):
+def assign_images(resource_id, keyword, **kwargs):
     '''
-    Assigns images to a course given a keyword.
-    Optionally specify topic_id to map course images to (keyword, topic_id).
+    Assigns images to a resource given a keyword.
+    Optionally specify topic_id to map resource images to (keyword, topic_id).
     '''
     log = kwargs.get('logger', logging.getLogger(__file__))
     topic_id = kwargs.get('topic_id', None)
@@ -17,31 +17,31 @@ def assign_images(course_id, keyword, **kwargs):
     if topic_id is not None:
         filter_by['isite_topic_id'] = topic_id
 
-    lti_course = LTICourseImages.get_lti_course(course_id)
-    log.info('Found LTI course: %s' % lti_course)
+    lti_resource = LTIResourceImages.get_lti_resource(resource_id)
+    log.info('Found LTI resource: %s' % lti_resource)
 
-    LTICourseImages.objects.filter(course=lti_course).delete()
-    log.info('Deleted all images assigned to LTI course: %s' % lti_course)
+    LTIResourceImages.objects.filter(resource=lti_resource).delete()
+    log.info('Deleted all images assigned to LTI resource: %s' % lti_resource)
 
     isite_images = IsiteImages.objects.filter(**filter_by)
     log.info('Preparing to assign images: %s' % len(isite_images))
     
     collection_map = {}
-    course_image_records = []
+    resource_image_records = []
     for n, isite_image in enumerate(isite_images):
-        keyword = isite_image.isite_keyword
         topic_id = isite_image.isite_topic_id
+        collection_label = isite_image.isite_topic_title
         if topic_id in collection_map:
             collection = collection_map[topic_id]
         else:
-            collection = LTICourseCollections(sort_order=len(collection_map.keys()), label="%s: %s" % (keyword, topic_id))
+            collection = LTIResourceCollections(sort_order=len(collection_map.keys()), label=collection_label)
             collection.save()
             collection_map[topic_id] = collection
             log.info('Created collection %s' % collection)
-        course_image_records.append(LTICourseImages(course=lti_course, collection=collection, isite_image=isite_image))
+        resource_image_records.append(LTIResourceImages(resource=lti_resource, collection=collection, isite_image=isite_image))
 
-    LTICourseImages.objects.bulk_create(course_image_records)
-    log.info('Assigned %s images to course: %s' % (len(course_image_records), lti_course))
+    LTIResourceImages.objects.bulk_create(resource_image_records)
+    log.info('Assigned %s images to resource: %s' % (len(resource_image_records), lti_resource))
 
 
 class IsiteImageDataLoader:
@@ -112,7 +112,7 @@ class IsiteImageDataLoader:
                 s3_key = file_item['url']
                 s3_bucket = self.s3_bucket
 
-            file_description = "%s - %s" % (site_title, topic_title)
+            file_description = ""
             if 'Description' in file_item:
                 file_description = file_item['Description']
                 
@@ -126,6 +126,8 @@ class IsiteImageDataLoader:
                 'isite_file_url': file_item['url'],
                 'isite_file_title': file_title,
                 'isite_file_description': file_description,
+                'isite_site_title': site_title,
+                'isite_topic_title': topic_title,
                 'isite_topic_id': topic_id,
                 'isite_keyword': keyword,
                 's3_key': s3_key,

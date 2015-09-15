@@ -47,7 +47,7 @@ class Manifest(IIIFObject):
     
     Each object must have a unique ID that can be mapped to a URL. For this implementation:
     
-        -the Manifest may be uniquely identified by the course ID.
+        -the Manifest may be uniquely identified by the resource ID.
         -the Sequence may be uniquely identified by "1" because there is only
          one Sequence in this implementation.
         -the Canvas may be uniquely identified by the image ID because

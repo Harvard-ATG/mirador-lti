@@ -5,7 +5,7 @@ from .views import index, import_api_load, import_api_assign
 import os
 
 urlpatterns = [
-    url(r'^(?P<course_id>\d+)$', index, name='index'),
+    url(r'^(?P<resource_id>\d+)$', index, name='index'),
     url(r'^images/logos/(?P<path>.*)$', serve, { 
         'document_root': os.path.join(settings.STATIC_ROOT, 'images', 'logos')
     }),

@@ -3,11 +3,11 @@ from django.core.urlresolvers import reverse
 from django.conf import settings
 import json
 from manifest import Manifest
-from mirador.models import IsiteImages, LTICourseImages, LTICourseCollections
+from mirador.models import IsiteImages, LTIResourceImages, LTIResourceCollections
 
 def manifest(request, **kwargs):
     '''
-    Returns JSON output to render a IIIF manifest of images that belong to a course.
+    Returns JSON output to render a IIIF manifest of images that belong to a resource.
     
     This is intended to work with Mirador.
     
@@ -38,36 +38,36 @@ def manifest(request, **kwargs):
 def _manifest(request, manifest_id):
     '''Returns a Manifest object that has been instantiated and populated with images.'''
     ids = manifest_id.split(':', 2)
-    course_id = ids[0]
+    resource_id = ids[0]
     collection_id = None
     manifest_label = 'Manifest'
-    manifest_description = 'Manifest of course images'
+    manifest_description = 'Manifest of resource images'
     if len(ids) == 2:
         collection_id = ids[1]
-        collection = LTICourseCollections.objects.get(pk=collection_id)
+        collection = LTIResourceCollections.objects.get(pk=collection_id)
         manifest_label = collection.label
         manifest_description = "Manifest of images for collection %s" % collection.label
 
-    images = _get_images(request, course_id, collection_id)
-    #print "manifest_id=%s course_id=%s collection_id=%s images=%s" % (manifest_id, course_id, collection_id, len(images))
+    images = _get_images(request, resource_id, collection_id)
+    #print "manifest_id=%s resource_id=%s collection_id=%s images=%s" % (manifest_id, resource_id, collection_id, len(images))
 
     manifest = Manifest(request, manifest_id, label=manifest_label, description=manifest_description)
     manifest.create(images=images)
 
     return manifest
 
-def _get_images(request, course_id, collection_id):
+def _get_images(request, resource_id, collection_id):
     '''Returns a list of images [(id, is_link, label), ...] that belong to a manifest.'''
-    lti_course = LTICourseImages.get_lti_course(course_id)
+    lti_resource = LTIResourceImages.get_lti_resource(resource_id)
 
-    filter_by = {'course':lti_course}
+    filter_by = {'resource':lti_resource}
     if collection_id is not None:
         filter_by['collection__id'] = collection_id
 
-    lti_course_images = LTICourseImages.objects.select_related().filter(**filter_by)
+    lti_resource_images = LTIResourceImages.objects.select_related().filter(**filter_by)
     manifest_images = []
 
-    for c in lti_course_images:
+    for c in lti_resource_images:
         manifest_img = {
             'id': c.isite_image.id,
             'is_link': c.isite_image.isite_file_type == 'link',
