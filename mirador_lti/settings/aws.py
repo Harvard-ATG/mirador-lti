@@ -8,8 +8,8 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': SECURE_SETTINGS.get('db_default_name', 'canvas_syllabus_export'),
-        'USER': SECURE_SETTINGS.get('db_default_user', 'canvas_syllabus_export'),
+        'NAME': SECURE_SETTINGS.get('db_default_name', 'mirador_lti'),
+        'USER': SECURE_SETTINGS.get('db_default_user', 'mirador_lti'),
         'PASSWORD': SECURE_SETTINGS.get('db_default_password'),
         'HOST': SECURE_SETTINGS.get('db_default_host', '127.0.0.1'),
         'PORT': SECURE_SETTINGS.get('db_default_port', 5432),
