@@ -1,47 +1,125 @@
 from boto.s3.connection import S3Connection
 from boto.s3.key import Key
-from .models import IsiteImages, LTIResourceImages, LTIResourceCollections
+from .models import IsiteImage, ImageSource, LTIResourceImages, ImageCollection
 
 import logging
 import json
 
-def assign_images(resource_id, keyword, **kwargs):
+class IsiteImageAssigner:
     '''
-    Assigns images to a resource given a keyword.
-    Optionally specify topic_id to map resource images to (keyword, topic_id).
+    This class is responsbile for assigning iSite images to tool instances (lti resource)
+    given an iSite keyword (optional topic ID).
     '''
-    log = kwargs.get('logger', logging.getLogger(__file__))
-    topic_id = kwargs.get('topic_id', None)
+    def __init__(self, resource_id, keyword, **kwargs):
+        self.resource_id = resource_id
+        self.keyword = keyword
+        self.topic_id = kwargs.get('topic_id', None)
 
-    filter_by = {'isite_keyword': keyword}
-    if topic_id is not None:
-        filter_by['isite_topic_id'] = topic_id
-
-    lti_resource = LTIResourceImages.get_lti_resource(resource_id)
-    log.info('Found LTI resource: %s' % lti_resource)
-
-    LTIResourceImages.objects.filter(resource=lti_resource).delete()
-    log.info('Deleted all images assigned to LTI resource: %s' % lti_resource)
-
-    isite_images = IsiteImages.objects.filter(**filter_by)
-    log.info('Preparing to assign images: %s' % len(isite_images))
-    
-    collection_map = {}
-    resource_image_records = []
-    for n, isite_image in enumerate(isite_images):
-        topic_id = isite_image.isite_topic_id
-        collection_label = isite_image.isite_topic_title
-        if topic_id in collection_map:
-            collection = collection_map[topic_id]
+        if 'logger' in kwargs:
+            self.log = kwargs.get('logger')
         else:
-            collection = LTIResourceCollections(sort_order=len(collection_map.keys()), label=collection_label)
-            collection.save()
-            collection_map[topic_id] = collection
-            log.info('Created collection %s' % collection)
-        resource_image_records.append(LTIResourceImages(resource=lti_resource, collection=collection, isite_image=isite_image))
+            self.log = logging.getLogger(__file__)
 
-    LTIResourceImages.objects.bulk_create(resource_image_records)
-    log.info('Assigned %s images to resource: %s' % (len(resource_image_records), lti_resource))
+        self.lti_resource = LTIResourceImages.get_lti_resource(self.resource_id)
+        self.isite_image_filters = {'isite_keyword': self.keyword}
+        if self.topic_id is not None:
+            self.isite_image_filters['isite_topic_id'] = self.topic_id
+    
+    def assign(self):
+        '''
+        Assigns images to a resource, creating collections for each iSite topic as needed.
+        '''
+        self.log.info("Assign images to resource %s with filters: %s" % (self.lti_resource, self.isite_image_filters))
+        self.reset_resource();
+        self.create_image_sources()
+        self.create_image_collections()
+        self.log.info("Done assigning images.")
+    
+    def reset_resource(self):
+        '''
+        Resets the resource by deleting all collections and images associated with it.
+        '''
+        collection_ids = set(LTIResourceImages.objects.filter(resource=self.lti_resource).values_list('collection__id', flat=True))
+        lti_resource_collections = ImageCollection.objects.filter(pk__in=collection_ids)
+
+        self.log.info('Deleting collection_ids=%s associated with %s' % (collection_ids, self.lti_resource))
+        lti_resource_collections.delete()
+
+    def create_image_sources(self):
+        '''
+        Creates ImageSource records that don't already exist for a given set of IsiteImage records.
+        '''
+    
+        # Identify which isite images don't already exist as ImageSource records
+        iiif_file_ids = ImageSource.objects.all().values_list('iiif_file_id', flat=True)
+        isite_images = IsiteImage.objects.filter(**self.isite_image_filters).exclude(iiif_file_id__in=iiif_file_ids)
+        self.log.info('Preparing to create image sources: %s' % len(isite_images))
+        
+        image_source_records = []
+        image_source_type_choice = {
+            'link':ImageSource.LINK_TYPE,
+            'file':ImageSource.FILE_TYPE,
+        }
+    
+        # Create the image sources (only create if they don't already exist)
+        for n, isite_image in enumerate(isite_images):
+            source_type = image_source_type_choice[isite_image.isite_file_type]
+            file_url = None
+            if source_type == ImageSource.LINK_TYPE:
+                file_url = isite_image.isite_file_url
+    
+            image_source_records.append(ImageSource(
+                source_type=source_type,
+                file_url=file_url,
+                file_name=isite_image.isite_file_name,
+                title=isite_image.isite_file_title,
+                description=isite_image.isite_file_description,
+                iiif_file_id=isite_image.iiif_file_id,
+                is_iiif_compatible=source_type==ImageSource.FILE_TYPE,
+                is_isite_image=True,
+            ))
+    
+        ImageSource.objects.bulk_create(image_source_records)
+        self.log.info('Created %s image sources' % len(image_source_records))
+    
+    def create_image_collections(self):
+        '''
+        Creates an ImageCollection for each isite topic and the LTIResourceImages records.
+        '''
+
+        # Lookup the image sources for the given isite images
+        isite_images = IsiteImage.objects.filter(**self.isite_image_filters)
+        iiif_file_ids = isite_images.values_list('iiif_file_id', flat=True)
+        image_sources = ImageSource.objects.filter(iiif_file_id__in=iiif_file_ids)
+        if len(iiif_file_ids) != len(image_sources):
+            raise Exception("Mismatch between isite images and image sources. Make sure to create the image sources first.")
+
+        image_source_for = {}
+        for image_source in image_sources:
+            image_source_for[image_source.iiif_file_id] = image_source 
+
+        # Create a collection for each iSite topic and assign images to that collection
+        collection_map = {}
+        resource_image_records = []
+        for n, isite_image in enumerate(isite_images):
+            topic_id = isite_image.isite_topic_id
+            collection_label = isite_image.isite_topic_title 
+            collection_description = "Collection of images from %s on iSite %s" % (isite_image.isite_topic_title, isite_image.isite_site_title)
+
+            # Check to see if a collection has been created for the topic
+            if topic_id in collection_map:
+                collection = collection_map[topic_id]
+            else:
+                collection = ImageCollection(sort_order=len(collection_map.keys()), label=collection_label, description=collection_description)
+                collection.save()
+                collection_map[topic_id] = collection
+                self.log.info('Created LTI resource collection %s' % collection)
+
+            image_source = image_source_for[isite_image.iiif_file_id]
+            resource_image_records.append(LTIResourceImages(resource=self.lti_resource, collection=collection, image=image_source))
+
+        LTIResourceImages.objects.bulk_create(resource_image_records)
+        self.log.info('Added %s images to %s collections of resource %s' % (len(resource_image_records), len(collection_map.keys()), self.lti_resource))
 
 
 class IsiteImageDataLoader:
@@ -77,7 +155,7 @@ class IsiteImageDataLoader:
 
     def delete_all(self):
         '''Deletes all image objects.'''
-        IsiteImages.objects.all().delete()
+        IsiteImage.objects.all().delete()
         return self
     
     def load_all(self, **kwargs):
@@ -106,11 +184,7 @@ class IsiteImageDataLoader:
         for n, file_item in enumerate(d['files'], start=1):
             self.log.info("Loading file item #%s: %s" % (n, file_item.values()))
             
-            s3_bucket = None
-            s3_key = None
-            if file_item['type'] == 'file':
-                s3_key = file_item['url']
-                s3_bucket = self.s3_bucket
+            iiif_file_id = file_item['url']
 
             file_description = ""
             if 'Description' in file_item:
@@ -130,8 +204,7 @@ class IsiteImageDataLoader:
                 'isite_topic_title': topic_title,
                 'isite_topic_id': topic_id,
                 'isite_keyword': keyword,
-                's3_key': s3_key,
-                's3_bucket': s3_bucket,
+                'iiif_file_id': iiif_file_id,
             })
     
     def validate_data_for(self, keyword, topic_id, data):
@@ -153,13 +226,13 @@ class IsiteImageDataLoader:
     
     def save_file_item(self, item_dict):
         '''Saves an image item to the database.'''
-        item_exists = IsiteImages.objects.filter(**item_dict).exists()
+        item_exists = IsiteImage.objects.filter(**item_dict).exists()
         if item_exists:
             self.log.info("Item already exists -- did not save")
         else:
             isite_image_id = None
             if self.can_save:
-                isite_image = IsiteImages(**item_dict)
+                isite_image = IsiteImage(**item_dict)
                 isite_image.save()
                 isite_image_id = isite_image.id
             self.log.info("Saved item %s" % isite_image_id)

@@ -3,7 +3,7 @@ from django.shortcuts import render
 from django.http import HttpResponse, Http404
 from django.contrib.auth.decorators import user_passes_test
 
-from .isite import IsiteImageDataLoader, iSiteImageDataSource, assign_images
+from .isite import IsiteImageDataLoader, iSiteImageDataSource, IsiteImageAssigner
 from .manifests import ManifestLinks
 
 import logging
@@ -62,7 +62,8 @@ def import_api_assign(request):
     if topic_id in request.GET:
         topic_id = request.GET.get('topic_id', None)
 
-    assign_images(resource_id, keyword, topic_id=topic_id, logger=logger)
+    isite_image_assigner = IsiteImageAssigner(resource_id, keyword, topic_id=topic_id, logger=logger)
+    isite_image_assigner.assign()
 
     log_contents = log_capture_string.getvalue()
     log_capture_string.close()

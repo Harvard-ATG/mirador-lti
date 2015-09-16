@@ -12,7 +12,45 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='IsiteImages',
+            name='ImageCollection',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('label', models.CharField(max_length=128)),
+                ('description', models.TextField(null=True, blank=True)),
+                ('sort_order', models.IntegerField(default=0)),
+                ('created', models.DateTimeField(auto_now_add=True)),
+                ('updated', models.DateTimeField(auto_now=True)),
+            ],
+            options={
+                'ordering': ['sort_order'],
+                'verbose_name': 'Image Collection',
+                'verbose_name_plural': 'Image Collections',
+            },
+        ),
+        migrations.CreateModel(
+            name='ImageSource',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('source_type', models.CharField(default=b'FILE', max_length=4, choices=[(b'FILE', b'File'), (b'LINK', b'URL to File')])),
+                ('file_name', models.CharField(max_length=2048, null=True, blank=True)),
+                ('file_url', models.CharField(max_length=4096, null=True, blank=True)),
+                ('title', models.CharField(max_length=2048)),
+                ('description', models.TextField(null=True, blank=True)),
+                ('metadata', models.TextField(null=True, blank=True)),
+                ('iiif_file_id', models.CharField(max_length=4096, null=True, blank=True)),
+                ('is_iiif_compatible', models.BooleanField(default=True)),
+                ('is_isite_image', models.BooleanField(default=False)),
+                ('created', models.DateTimeField(auto_now_add=True)),
+                ('updated', models.DateTimeField(auto_now=True)),
+            ],
+            options={
+                'ordering': ['id'],
+                'verbose_name': 'Image Source',
+                'verbose_name_plural': 'Image Sources',
+            },
+        ),
+        migrations.CreateModel(
+            name='IsiteImage',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('isite_file_type', models.CharField(max_length=64)),
@@ -24,8 +62,7 @@ class Migration(migrations.Migration):
                 ('isite_topic_title', models.CharField(max_length=4096)),
                 ('isite_topic_id', models.CharField(max_length=128)),
                 ('isite_keyword', models.CharField(max_length=128)),
-                ('s3_key', models.CharField(max_length=4096, null=True)),
-                ('s3_bucket', models.CharField(max_length=128, null=True)),
+                ('iiif_file_id', models.CharField(max_length=4096)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('updated', models.DateTimeField(auto_now=True)),
             ],
@@ -36,28 +73,13 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.CreateModel(
-            name='LTIResourceCollections',
-            fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('label', models.CharField(max_length=128)),
-                ('sort_order', models.IntegerField(default=0)),
-                ('created', models.DateTimeField(auto_now_add=True)),
-                ('updated', models.DateTimeField(auto_now=True)),
-            ],
-            options={
-                'ordering': ['sort_order'],
-                'verbose_name': 'LTI Resource Collection',
-                'verbose_name_plural': 'LTI Resource Collections',
-            },
-        ),
-        migrations.CreateModel(
             name='LTIResourceImages',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('updated', models.DateTimeField(auto_now=True)),
-                ('collection', models.ForeignKey(to='mirador.LTIResourceCollections', null=True)),
-                ('isite_image', models.ForeignKey(to='mirador.IsiteImages')),
+                ('collection', models.ForeignKey(to='mirador.ImageCollection', null=True)),
+                ('image', models.ForeignKey(to='mirador.ImageSource')),
                 ('resource', models.ForeignKey(to='django_app_lti.LTIResource')),
             ],
             options={

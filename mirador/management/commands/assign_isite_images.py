@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand, CommandError
-from mirador.isite import assign_images
+from mirador.isite import IsiteImageAssigner
 import logging
 
 class Command(BaseCommand):
@@ -14,4 +14,5 @@ class Command(BaseCommand):
         logger.addHandler(ch)
         logger.setLevel(logging.DEBUG)
 
-        assign_images(options['resource_id'], options['keyword'], topic_id=options['topic_id'], logger=logger)
+        isite_image_assigner = IsiteImageAssigner(options['resource_id'], options['keyword'], topic_id=options['topic_id'], logger=logger)
+        isite_image_assigner.assign()

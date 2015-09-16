@@ -3,7 +3,7 @@ from mirador.isite import IsiteImageDataLoader, iSiteImageDataSource
 import logging
 
 class Command(BaseCommand):
-    help = 'Loads isite image data'
+    help = 'Refresh database of available images exported from iSite Slide Tools'
 
     def add_arguments(self, parser):
         parser.add_argument('s3_bucket')

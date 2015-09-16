@@ -1,9 +1,10 @@
 from django.http import HttpResponse, Http404
 from django.core.urlresolvers import reverse
+from django.shortcuts import get_object_or_404
 from django.conf import settings
 import json
 from manifest import Manifest
-from mirador.models import IsiteImages, LTIResourceImages, LTIResourceCollections
+from mirador.models import ImageSource, ImageCollection, LTIResourceImages
 
 def manifest(request, **kwargs):
     '''
@@ -44,9 +45,9 @@ def _manifest(request, manifest_id):
     manifest_description = 'Manifest of resource images'
     if len(ids) == 2:
         collection_id = ids[1]
-        collection = LTIResourceCollections.objects.get(pk=collection_id)
+        collection = get_object_or_404(ImageCollection, pk=collection_id)
         manifest_label = collection.label
-        manifest_description = "Manifest of images for collection %s" % collection.label
+        manifest_description = collection.description
 
     images = _get_images(request, resource_id, collection_id)
     #print "manifest_id=%s resource_id=%s collection_id=%s images=%s" % (manifest_id, resource_id, collection_id, len(images))
@@ -68,19 +69,21 @@ def _get_images(request, resource_id, collection_id):
     manifest_images = []
 
     for c in lti_resource_images:
+        is_image_link = c.image.source_type == ImageSource.LINK_TYPE
         manifest_img = {
-            'id': c.isite_image.id,
-            'is_link': c.isite_image.isite_file_type == 'link',
-            'label': c.isite_image.isite_file_title,
+            'id': c.image.id,
+            'is_link': is_image_link,
+            'label': c.image.title,
             'url': '',
         }
  
-        if c.isite_image.isite_file_type == 'file':
-            manifest_img['url'] = settings.IIIF_IMAGE_SERVER_URL + c.isite_image.s3_key
-        elif c.isite_image.isite_file_type == 'link':
-            manifest_img['url'] = c.isite_image.isite_file_url
+        if c.image.is_iiif_compatible: 
+            manifest_img['url'] = settings.IIIF_IMAGE_SERVER_URL + c.image.iiif_file_id
         else:
-            raise Exception("unknown image file type: %s" % c.isite_image.isite_file_type)
+            if is_image_link:
+                manifest_img['url'] = c.image.file_url
+            else:
+                raise Exception("unknown image source type: %s" % c.image.source_type)
 
         manifest_images.append(manifest_img)
 

@@ -1,5 +1,5 @@
 from django.core.urlresolvers import reverse
-from .models import LTIResourceImages, LTIResourceCollections
+from .models import LTIResourceImages, ImageCollection
 
 import json
 
@@ -66,6 +66,6 @@ class ManifestLinks:
         collections = []
         collection_ids = LTIResourceImages.objects.filter(resource__id=self.resource_id).distinct().values_list('collection', flat=True)
         if len(collection_ids) > 0:
-            collections = LTIResourceCollections.objects.filter(id__in=collection_ids).order_by('sort_order', 'label')
+            collections = ImageCollection.objects.filter(id__in=collection_ids).order_by('sort_order', 'label')
         return collections
 
