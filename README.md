@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/Harvard-ATG/mirador-lti.svg?branch=master)](https://travis-ci.org/Harvard-ATG/mirador-lti)
+
 # Mirador LTI Tool
 
 ## Quickstart
