@@ -21,9 +21,20 @@ class IIIFManifestTest(unittest.TestCase):
         ]
         return images
 
-    def test_create_manifest(self):
+    def test_create_manifest_with_images(self):
         manifest_id = 1
         request, manifest = self.create_manifest(manifest_id)
-        manifest.create(images=self.create_images_list())
-        manifest_dict = manifest.to_dict()
-        self.assertTrue(manifest_dict)
+        images = self.create_images_list()
+        non_link_images = [img for img in images if img['is_link'] is False]
+        manifest.create(images=images)
+        md = manifest.to_dict()
+
+        for key in ('@context', '@type', '@id', 'label', 'description', 'sequences'):
+            self.assertTrue(key in md, "manifest should have a %s attribute" % key)
+
+        self.assertEqual(len(md['sequences']), 1, "should have one default sequence")
+        self.assertEqual(len(md['sequences'][0]['canvases']), len(non_link_images), "one canvas per image")
+
+        for idx, canvas in enumerate(md['sequences'][0]['canvases']): 
+            self.assertEqual(canvas['label'], non_link_images[idx]['label'], "canvas label should match image label")
+        
