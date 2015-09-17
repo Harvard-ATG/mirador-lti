@@ -5,7 +5,7 @@ from django.core.urlresolvers import reverse
 
 from .manifests import ManifestLinks
 
-class ManifestLinksTest(unittest.TestCase):
+class IIIFManifestTest(unittest.TestCase):
     def setUp(self):
         self.factory = RequestFactory()
 
