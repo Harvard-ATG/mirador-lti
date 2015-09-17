@@ -1,1 +1,3 @@
-from .aws import *
+from .base import *
+
+SECRET_KEY = 'test'

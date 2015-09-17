@@ -3,6 +3,7 @@ python:
   - "2.7"
 env:
   - DJANGO=1.8.2
+  - DJANGO_SETTINGS_MODULE="mirador_lti.settings.test"
 before_install:
   - cd mirador_lti/requirements
 install:
