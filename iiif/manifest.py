@@ -29,9 +29,9 @@ class IIIFObject:
         '''Returns a string representation.'''
         return self.to_json()    
 
-class Manifest(IIIFObject):
+class IIIFManifest(IIIFObject):
     '''
-    IIIF Manifest represents a collection of images and defines the overall structure
+    IIIFManifest represents a collection of images and defines the overall structure
     of the collection.
 
     A Manifest object is composed of Sequence, Canvas, and ImageResource objects:
@@ -86,7 +86,7 @@ class Manifest(IIIFObject):
         return self
  
     def add_sequence(self, sequence_id):
-        sequence = Sequence(self, sequence_id)
+        sequence = IIIFSequence(self, sequence_id)
         self.sequences.append(sequence)
         return sequence
     
@@ -129,14 +129,14 @@ class Manifest(IIIFObject):
         }
         return manifest
 
-class Sequence(IIIFObject):
+class IIIFSequence(IIIFObject):
     def __init__(self, manifest, sequence_id):
         self.manifest = manifest
         self.id = sequence_id
         self.canvases = []
 
     def add_canvas(self, canvas_id):
-        canvas = Canvas(self.manifest, canvas_id)
+        canvas = IIIFCanvas(self.manifest, canvas_id)
         self.canvases.append(canvas)
         return canvas
     
@@ -156,7 +156,7 @@ class Sequence(IIIFObject):
         }
         return sequence
 
-class Canvas(IIIFObject):
+class IIIFCanvas(IIIFObject):
     def __init__(self, manifest, canvas_id):
         self.manifest = manifest
         self.id = canvas_id
@@ -164,7 +164,7 @@ class Canvas(IIIFObject):
         self.resource = None
 
     def add_image(self, image_id, image_url, is_link):
-        self.resource = ImageResource(self.manifest, image_id, image_url, is_link)
+        self.resource = IIIFImageResource(self.manifest, image_id, image_url, is_link)
         return self
     
     def set_label(self, label):
@@ -192,7 +192,7 @@ class Canvas(IIIFObject):
         }
         return canvas
 
-class ImageResource(IIIFObject):
+class IIIFImageResource(IIIFObject):
     def __init__(self, manifest, resource_id, image_url, is_link=False):
         self.manifest = manifest
         self.id = resource_id

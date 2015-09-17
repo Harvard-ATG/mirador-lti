@@ -3,7 +3,7 @@ from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404
 from django.conf import settings
 import json
-from manifest import Manifest
+from manifest import IIIFManifest
 from mirador.models import ImageSource, ImageCollection, LTIResourceImages
 
 def manifest(request, **kwargs):
@@ -37,7 +37,7 @@ def manifest(request, **kwargs):
     raise Http404
 
 def _manifest(request, manifest_id):
-    '''Returns a Manifest object that has been instantiated and populated with images.'''
+    '''Returns a IIIFManifest object that has been instantiated and populated with images.'''
     ids = manifest_id.split(':', 2)
     resource_id = ids[0]
     collection_id = None
@@ -52,7 +52,7 @@ def _manifest(request, manifest_id):
     images = _get_images(request, resource_id, collection_id)
     #print "manifest_id=%s resource_id=%s collection_id=%s images=%s" % (manifest_id, resource_id, collection_id, len(images))
 
-    manifest = Manifest(request, manifest_id, label=manifest_label, description=manifest_description)
+    manifest = IIIFManifest(request, manifest_id, label=manifest_label, description=manifest_description)
     manifest.create(images=images)
 
     return manifest
