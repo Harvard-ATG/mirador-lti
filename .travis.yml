@@ -1,0 +1,12 @@
+language: python
+python:
+  - "2.7"
+env:
+  - DJANGO=1.8.2
+before_install:
+  - cd mirador_lti/requirements
+install:
+  - "pip install -r test.txt"
+script:
+  - cd ../..
+  - python manage.py test
