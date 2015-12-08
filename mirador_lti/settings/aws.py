@@ -25,9 +25,9 @@ REDIS_PORT = SECURE_SETTINGS.get('redis_port', 6379)
 
 CACHES = {
     'default': {
-        'BACKEND': 'redis_cache.RedisCache',
+        'BACKEND': 'django_redis.cache.RedisCache',
         'LOCATION': "%s:%s" % (REDIS_HOST, REDIS_PORT),
-        'KEY_PREFIX': 'canvas_syllabus_export', # Provide a unique value for shared cache
+        'KEY_PREFIX': 'mirador_lti', # Provide a unique value for shared cache
         'TIMEOUT': SECURE_SETTINGS.get('cache_timeout_in_secs', 60 * 20),
     },
 }
